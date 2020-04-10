@@ -4,6 +4,9 @@ version = "0.1.0"
 authors = ["Ace Eldeib <alexeldeib@gmail.com>"]
 edition = "2018"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dependencies]
+block-utils = "0.6.2"
+udev = "0.3.0"
+
+[profile.release]
+lto = true
