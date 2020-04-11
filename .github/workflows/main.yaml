@@ -1,11 +1,10 @@
-on: {
+on:
   push:
     branches:
       - master
   pull_request:
     branches:
       - master
-}
 
 env:
   DOCKER_USER: ${{ secrets.DOCKER_USER }}
