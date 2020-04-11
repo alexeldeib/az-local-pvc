@@ -22,8 +22,7 @@ tasks:
       curl -sL https://download.docker.com/linux/debian/gpg -o debian.asc
       sudo apt-key add debian.asc
       sudo apt-get update
-      sudo apt-get install -y docker-ce docker-ce-cli containerd.io <
-
+      # sudo apt-get install -y docker-ce docker-ce-cli containerd.io
   - build: |
       set -o errexit
       set -o nounset
