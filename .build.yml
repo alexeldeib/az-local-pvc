@@ -40,3 +40,5 @@ tasks:
       sudo docker tag ${REPO}/${IMAGE}:${TAG} ${REPO}/${IMAGE}:latest
       sudo docker push ${REPO}/${IMAGE}:${TAG}
       sudo docker push ${REPO}/${IMAGE}:latest
+
+      docker images
