@@ -12,6 +12,9 @@ secrets:
   - 21bdadaa-095c-4968-9a6e-ce9b795042b4 # docker_pass
 sources:
   - https://github.com/alexeldeib/az-local-pvc
+environment:
+  docker_version: 19.03.8~3-0
+  container_version: 1.2.6-3
 tasks:
   - install: |
       set -o errexit
@@ -24,13 +27,13 @@ tasks:
       DISTRO="$(cat /etc/os-release | grep CODENAME | cut -d'=' -f2)"
       echo "deb [arch=amd64] https://download.docker.com/linux/debian $DISTRO stable" | sudo tee /etc/apt/sources.list.d/docker.list
 
-      curl -sL https://download.docker.com/linux/debian/dists/buster/pool/stable/amd64/containerd.io_1.2.6-3_amd64.deb -o containerd.io.deb
-      curl -sL https://download.docker.com/linux/debian/dists/buster/pool/stable/amd64/docker-ce-cli_19.03.8~3-0~debian-buster_amd64.deb -o docker-ce-cli.io.deb
-      curl -sL https://download.docker.com/linux/debian/dists/buster/pool/stable/amd64/docker-ce_19.03.8~3-0~debian-buster_amd64.deb -o docker-ce.io.deb
+      curl -sL "https://download.docker.com/linux/debian/dists/buster/pool/stable/amd64/containerd.io_${containerd_version}_amd64.deb" -o containerd.io.deb
+      curl -sL "https://download.docker.com/linux/debian/dists/buster/pool/stable/amd64/docker-ce-cli_${docker_version}~debian-buster_amd64.deb" -o docker-ce-cli.io.deb
+      curl -sL "https://download.docker.com/linux/debian/dists/buster/pool/stable/amd64/docker-ce_${docker_version}~debian-buster_amd64.deb" -o docker-ce.io.deb
 
       sudo dpkg -i containerd.io.deb
       sudo dpkg -i docker-ce-cli.io.deb
-      sudo dpkg -i docker-ce.io.deb
+      # sudo dpkg -i docker-ce.io.deb
 
       systemctl status dockerd
       systemctl status containerd
