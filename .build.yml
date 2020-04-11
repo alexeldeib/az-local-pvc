@@ -1,0 +1,20 @@
+image: debian
+environment:
+  repo: docker.io/alexeldeib
+  image: az-local-pvc
+packages:
+  - docker
+secrets:
+  - 7bb48981-fc03-4344-bae3-736c99f94f49 # docker_user
+  - 21bdadaa-095c-4968-9a6e-ce9b795042b4 # docker_pass
+sources:
+  - https://github.com/alexeldeib/az-local-pvc
+tasks:
+  - setup: |
+      docker login -u $(cat ~/.docker_user) --password-stdin < ~/.docker_pass
+      TAG=$(date -Ihours | tr :+ -)
+      echo "TAG: ${TAG}"
+      docker build -t ${REPO}/${IMAGE}:${TAG} .
+      docker tag -t ${REPO}/${IMAGE}:latest .
+      docker push ${REPO}/${IMAGE}:${TAG}
+      docker push ${REPO}/${IMAGE}:latest
