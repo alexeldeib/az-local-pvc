@@ -16,13 +16,22 @@ tasks:
       set -o nounset
       set -o pipefail
 
+      sudo mount -t tmpfs -o size=4G /dev/null /dev/shm
+      sudo service cgroups start
+      sleep 2
+    
       DISTRO="$(cat /etc/os-release | grep CODENAME | cut -d'=' -f2)"
       echo "deb [arch=amd64] https://download.docker.com/linux/debian $DISTRO stable" | sudo tee /etc/apt/sources.list.d/docker.list
 
       curl -sL https://download.docker.com/linux/debian/gpg -o debian.asc
       sudo apt-key add debian.asc
       sudo apt-get update
-      # sudo apt-get install -y docker-ce docker-ce-cli containerd.io
+      sudo apt-get install -y docker-ce docker-ce-cli containerd.io
+
+      sudo nohup dockerd --bip 172.18.0.1/16 </dev/null >/dev/null 2>&1 &
+      sleep 5
+      sudo usermod -aG docker $(whoami)
+
   - build: |
       set -o errexit
       set -o nounset
