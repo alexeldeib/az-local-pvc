@@ -1,0 +1,36 @@
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: local-storage-formatter
+  namespace: default
+  labels:
+    app: local-storage-formatter
+spec:
+  selector:
+    matchLabels:
+      app: local-storage-formatter 
+  template:
+    metadata:
+      labels:
+        app: local-storage-formatter
+    spec:
+      serviceAccountName: local-storage-admin
+      containers:
+      - image: "docker.io/alexeldeib/az-local-pvc:latest"
+        imagePullPolicy: "Always"
+        name: formatter
+        securityContext:
+          privileged: true
+        volumeMounts:           
+        - mountPath:  /mnt/pv-disks 
+          name: pv-disks
+          mountPropagation: "Bidirectional" 
+      volumes:
+        - name: provisioner-dev
+          hostPath:
+            path: /dev
+        - name: pv-disks
+          hostPath:
+            path: /mnt/pv-disks
+---

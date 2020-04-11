@@ -4,9 +4,8 @@ version = "0.1.0"
 authors = ["Ace Eldeib <alexeldeib@gmail.com>"]
 edition = "2018"
 
-[dependencies]
-block-utils = "0.6.2"
-udev = "0.3.0"
-
 [profile.release]
 lto = true
+
+[dependencies]
+crossbeam-channel = "0.4"

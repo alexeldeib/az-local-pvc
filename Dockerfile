@@ -18,7 +18,13 @@ RUN cargo build --release
 COPY src ./src
 RUN cargo install --target x86_64-unknown-linux-musl --path .
 
+# Fix bugs in distroless
+# FROM amd64/busybox:latest as busybox
+FROM gcr.io/distroless/base:debug
+# COPY --from=busybox /bin/busybox /busybox/busybox
+# RUN ["/busybox/busybox", "--install", "/bin"]
+
+# FROM ubuntu:18.04
 # Copy the statically-linked binary into a scratch container.
-FROM gcr.io/distroless/static:nonroot
-COPY --from=build "/usr/local/cargo/bin/az-local-pvc" .
+COPY --from=build /usr/local/cargo/bin/az-local-pvc .
 ENTRYPOINT ["./az-local-pvc"]

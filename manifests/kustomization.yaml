@@ -1,0 +1,8 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+# - local-storage-consumer.yaml # uncomment for demo consumer + dynamic pvc
+- local-storage-provisioner.yaml
+- local-storage-formatter.yaml
+- rbac.yaml
+- storage-class.yaml

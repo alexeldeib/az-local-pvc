@@ -1,0 +1,71 @@
+---
+# Source: provisioner/templates/provisioner.yaml
+ 
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: az-pvc-config 
+  namespace: default 
+data:
+  storageClassMap: |     
+    fast-disks:
+       hostDir: /mnt/pv-disks
+       mountDir: /mnt/pv-disks 
+       blockCleanerCommand:
+         - "/scripts/shred.sh"
+         - "2"
+       setPVOwnerRef: true
+       volumeMode: Filesystem
+       fsType: ext4
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: local-storage-consumer
+  name: local-storage-consumer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: local-storage-consumer
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: local-storage-consumer
+    spec:
+      hostPID: true
+      containers:
+      - image: ubuntu:bionic
+        command: ["sleep", "infinity"]
+        name: ubuntu
+        securityContext:
+          privileged: true
+        resources:
+          limits:
+            cpu: 100m
+            memory: 100Mi
+          requests:
+            cpu: 10m
+            memory: 50Mi
+        volumeMounts:
+        - mountPath: /fast
+          name: fast
+      volumes:
+      - name: fast
+        persistentVolumeClaim:
+          claimName: nvme-claim
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: nvme-claim
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+  storageClassName: fast-disks
+---
