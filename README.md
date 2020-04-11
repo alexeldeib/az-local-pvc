@@ -1,5 +1,7 @@
 [![stability-experimental](https://img.shields.io/badge/stability-experimental-orange.svg)](#experimental)
 [![builds.sr.ht status](https://builds.sr.ht/~alexeldeib/az-local-pvc/.build.yml.svg)](https://builds.sr.ht/~alexeldeib/az-local-pvc/.build.yml?)
+[![github actions status](https://github.com/alexeldeib/az-local-pvc/workflows/.github/workflows/main.yaml/badge.svg)](https://github.com/alexeldeib/az-local-pvc/actions?query=workflow%3A.github%2Fworkflows%2Fmain.yaml)
+
 
 # az-local-pvc
 
