@@ -1,4 +1,4 @@
-image: debian
+image: debian/buster
 environment:
   repo: docker.io/alexeldeib
   image: az-local-pvc
