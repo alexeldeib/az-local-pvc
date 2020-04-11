@@ -1,4 +1,9 @@
-# Azure Local SSD as Kubernetes PVC
+# az-local-pvc
+
+[![stability-experimental](https://img.shields.io/badge/stability-experimental-orange.svg)](#experimental)
+
+## Experimental
+Code is new and may change or be removed in future versions. Please try it out and provide feedback. If it addresses a use-case that is important to you please open an issue to discuss it further.
 
 The goal of this project is to enable using local SSDs as PVCs in Kubernetes.
 
