@@ -19,10 +19,11 @@ tasks:
       DISTRO="$(cat /etc/os-release | grep CODENAME | cut -d'=' -f2)"
       echo "deb [arch=amd64] https://download.docker.com/linux/debian $DISTRO stable" | sudo tee /etc/apt/sources.list.d/docker.list
 
-      gpg --recv-keys 9DC858229FC7DD38854AE2D88D81803C0EBFCD88
-      gpg -a --export 9DC858229FC7DD38854AE2D88D81803C0EBFCD88 | sudo apt-key add -
+      curl -sL https://download.docker.com/linux/debian/gpg -o debian.asc
+      sudo apt-key add debian.asc
       sudo apt-get update
-      # sudo apt-get install -y docker-ce docker-ce-cli containerd.io < /dev/null
+      sudo apt-get install -y docker-ce docker-ce-cli containerd.io <
+
   - build: |
       set -o errexit
       set -o nounset
