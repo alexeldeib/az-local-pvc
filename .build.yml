@@ -5,9 +5,8 @@ environment:
 packages:
   - curl
   - gpg
-  - containerd.io
-  - docker-ce
-  - docker-ce-cli 
+  - docker-ce-cli
+  - docker
 secrets:
   - 7bb48981-fc03-4344-bae3-736c99f94f49 # docker_user
   - 21bdadaa-095c-4968-9a6e-ce9b795042b4 # docker_pass
