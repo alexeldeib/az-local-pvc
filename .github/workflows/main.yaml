@@ -26,6 +26,6 @@ jobs:
         TAG=$(date -Ihours | tr :+ -)
         echo "TAG: ${TAG}"
         docker build -t ${REPO}/${IMAGE}:${TAG} .
-        docker tag -t ${REPO}/${IMAGE}:latest .
+        docker tag ${REPO}/${IMAGE}:${TAG} ${REPO}/${IMAGE}:latest
         docker push ${REPO}/${IMAGE}:${TAG}
         docker push ${REPO}/${IMAGE}:latest
