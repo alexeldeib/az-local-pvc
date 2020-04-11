@@ -2,50 +2,58 @@
 extern crate crossbeam_channel;
 use crossbeam_channel::tick;
 
+use slog::{Drain, o, info};
+
 use std::fs;
 use std::io::{self, Error, ErrorKind};
 use std::process::{self, Command, Output};
 use std::time::Duration;
 
 fn main() {
-    println!("started binary");
-    println!("starting first run");
-    let mut result = main_loop();
+    // let decorator = slog_term::TermDecorator::new().build();
+    // let drain = slog_term::FullFormat::new(decorator).build().fuse();
+    let drain = slog_json::Json::default(std::io::stderr()).fuse();
+    let drain = slog_async::Async::new(drain).build().fuse();
+    let log = slog::Logger::root(drain, o!());
+
+    info!(log, "started binary");
+    info!(log, "starting first run");
+    let mut result = main_loop(&log);
     
-    println!("beginning ticker");
+    info!(log, "beginning ticker");
     let ticker = tick(Duration::from_secs(5));
     while let Ok(_) = result {
         select! {
-            recv(ticker) -> _ => result = main_loop(),
+            recv(ticker) -> _ => result = main_loop(&log),
         }
     }
 
-    println!("failed in main loop: {:?}", result);
+    info!(log, "failed in main loop: {:?}", result);
     process::exit(1);
 }
 
-fn main_loop() -> io::Result<()> {
-    println!("starting main loop");
+fn main_loop(log: &slog::Logger) -> io::Result<()> {
+    info!(log, "starting main loop");
     let block_devices = get_block_devices()
         .expect("failed to list block devices")
         .into_iter()
         .filter(|dev| dev.contains("nvme"))
         .collect::<Vec<String>>();
 
-    println!("finished discovering block devices");
+    info!(log, "finished discovering block devices");
 
-    println!("enumerating known devices");
+    info!(log, "enumerating known devices");
     for dev in block_devices {
         let needs_fs = should_format(&dev)?;
         let uuid = get_uuid(&dev).unwrap_or(String::from(""));
-        println!("found disk /dev/{} with existing uuid '{}'", dev, uuid);
+        info!(log, "found disk /dev/{} with existing uuid '{}'", dev, uuid);
         if needs_fs {
-            println!("formatting disk /dev/{}", dev);
+            info!(log, "formatting disk /dev/{}", dev);
             format_device(&dev)?;
         }
         mount_device(&dev)?;
     }
-    println!("successfully scanned and formatted all disks");
+    info!(log, "successfully scanned and formatted all disks");
     Ok(())
 }
 

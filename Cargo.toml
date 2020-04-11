@@ -9,3 +9,8 @@ lto = true
 
 [dependencies]
 crossbeam-channel = "0.4"
+slog = "2.5.2"
+slog-term = "2.5.0"
+slog-async = "2.5.0"
+slog-json = "2.3.0"
+clap = { git = "https://github.com/clap-rs/clap/" }
