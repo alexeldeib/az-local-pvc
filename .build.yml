@@ -11,7 +11,20 @@ sources:
   - https://github.com/alexeldeib/az-local-pvc
 tasks:
   - setup: |
-      docker login -u $(cat ~/.docker_user) --password-stdin < ~/.docker_pass
+      set -o errexit
+      set -o nounset
+      set -o pipefail
+
+      sudo mount -t tmpfs -o size=4G /dev/null /dev/shm
+      sleep 2
+      sudo nohup dockerd --bip 172.18.0.1/16 </dev/null >/dev/null 2>&1 &
+      sudo usermod -aG docker $(whoami)
+  - build: |
+      set -o errexit
+      set -o nounset
+      set -o pipefail
+      
+      cat ~/.docker_pass | sudo docker login -u $(cat ~/.docker_user) --password-stdin
       TAG=$(date -Ihours | tr :+ -)
       echo "TAG: ${TAG}"
       docker build -t ${REPO}/${IMAGE}:${TAG} .
