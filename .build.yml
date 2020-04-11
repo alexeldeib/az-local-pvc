@@ -29,8 +29,8 @@ tasks:
       curl -sL https://download.docker.com/linux/debian/dists/buster/pool/stable/amd64/docker-ce_19.03.8~3-0~debian-buster_amd64.deb -o docker-ce.io.deb
 
       sudo dpkg -i containerd.io.deb
-      sudo dpkf -i docker-ce-cli.io.deb
-      sudo dpkf -i docker-ce.io.deb
+      sudo dpkg -i docker-ce-cli.io.deb
+      sudo dpkg -i docker-ce.io.deb
 
       systemctl status dockerd
       systemctl status containerd
