@@ -23,7 +23,7 @@ jobs:
       run: |
         set -eux
         docker login -u ${DOCKER_USER} -p ${DOCKER_PASS}
-        TAG=$(date -Ihours | tr :+ -)
+        TAG=$(date -Iseconds | tr :+ -)
         echo "TAG: ${TAG}"
         docker build -t ${REPO}/${IMAGE}:${TAG} .
         docker tag ${REPO}/${IMAGE}:${TAG} ${REPO}/${IMAGE}:latest
