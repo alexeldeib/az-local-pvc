@@ -34,6 +34,6 @@ tasks:
       TAG=$(date -Ihours | tr :+ -)
       echo "TAG: ${TAG}"
       sudo docker build -t ${REPO}/${IMAGE}:${TAG} .
-      sudo docker tag -t ${REPO}/${IMAGE}:latest .
+      sudo docker tag ${REPO}/${IMAGE}:${TAG} ${REPO}/${IMAGE}:latest
       sudo docker push ${REPO}/${IMAGE}:${TAG}
       sudo docker push ${REPO}/${IMAGE}:latest
