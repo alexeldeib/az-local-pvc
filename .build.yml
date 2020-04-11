@@ -5,15 +5,16 @@ environment:
 packages:
   - curl
   - gpg
+  - containerd
   - docker-ce-cli
-  - docker
+  - docker-ce
 secrets:
   - 7bb48981-fc03-4344-bae3-736c99f94f49 # docker_user
   - 21bdadaa-095c-4968-9a6e-ce9b795042b4 # docker_pass
 sources:
   - https://github.com/alexeldeib/az-local-pvc
 repositories:
-- docker: https://download.docker.com/linux/debian stretch stable 9DC858229FC7DD38854AE2D88D81803C0EBFCD88
+  docker: https://download.docker.com/linux/debian buster stable 9DC858229FC7DD38854AE2D88D81803C0EBFCD88
 tasks:
   - install: |
       set -o errexit
