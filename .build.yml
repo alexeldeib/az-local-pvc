@@ -17,7 +17,6 @@ tasks:
       set -o pipefail
 
       sudo mount -t tmpfs -o size=4G /dev/null /dev/shm
-      sudo service cgroups start
       sleep 2
     
       DISTRO="$(cat /etc/os-release | grep CODENAME | cut -d'=' -f2)"
