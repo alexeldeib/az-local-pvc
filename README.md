@@ -1,4 +1,5 @@
 [![stability-experimental](https://img.shields.io/badge/stability-experimental-orange.svg)](#experimental)
+[![builds.sr.ht status](https://builds.sr.ht/~alexeldeib/az-local-pvc/.build.yml.svg)](https://builds.sr.ht/~alexeldeib/az-local-pvc/.build.yml?)
 
 # az-local-pvc
 
