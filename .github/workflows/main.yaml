@@ -8,14 +8,14 @@ on:
     branches:
       - master
 
-env:
-  DOCKER_USER: ${{ secrets.DOCKER_USER }}
-  DOCKER_PASS: ${{ secrets.DOCKER_PASS }}
-  REPO: docker.io/alexeldeib
-  IMAGE: az-local-pvc
+# env:
+#   DOCKER_USER: ${{ secrets.DOCKER_USER }}
+#   DOCKER_PASS: ${{ secrets.DOCKER_PASS }}
+#   REPO: docker.io/alexeldeib
+#   IMAGE: az-local-pvc
 
 jobs:
-  build: 
+  build:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@master
