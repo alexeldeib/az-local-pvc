@@ -3,49 +3,27 @@ environment:
   repo: docker.io/alexeldeib
   image: az-local-pvc
 packages:
-  - apt-transport-https
-  - ca-certificates
-  - curl
-  - gpg
+  - docker
 secrets:
   - 7bb48981-fc03-4344-bae3-736c99f94f49 # docker_user
   - 21bdadaa-095c-4968-9a6e-ce9b795042b4 # docker_pass
 sources:
   - https://github.com/alexeldeib/az-local-pvc
-environment:
-  docker_version: 19.03.8~3-0
-  containerd_version: 1.2.6-3
 tasks:
   - install: |
       set -o errexit
       set -o nounset
       set -o pipefail
 
-      # sudo mount -t tmpfs -o size=4G /dev/null /dev/shm
-      # sleep 2
-    
-      DISTRO="$(cat /etc/os-release | grep CODENAME | cut -d'=' -f2)"
-      echo "deb [arch=amd64] https://download.docker.com/linux/debian $DISTRO stable" | sudo tee /etc/apt/sources.list.d/docker.list
-
-      curl -sL "https://download.docker.com/linux/debian/dists/buster/pool/stable/amd64/containerd.io_${containerd_version}_amd64.deb" -o containerd.io.deb
-      curl -sL "https://download.docker.com/linux/debian/dists/buster/pool/stable/amd64/docker-ce-cli_${docker_version}~debian-buster_amd64.deb" -o docker-ce-cli.io.deb
-      curl -sL "https://download.docker.com/linux/debian/dists/buster/pool/stable/amd64/docker-ce_${docker_version}~debian-buster_amd64.deb" -o docker-ce.io.deb
-
-      sudo dpkg -i containerd.io.deb
-      sudo dpkg -i docker-ce-cli.io.deb
-      # sudo dpkg -i docker-ce.io.deb
-
-      systemctl status dockerd
-      systemctl status containerd
+      sudo mount -t tmpfs -o size=4G /dev/null /dev/shm
+      sudo service cgroups start
+      sleep 2
+      sudo nohup dockerd --bip 172.18.0.1/16 &
 
   - build: |
       set -o errexit
       set -o nounset
       set -o pipefail
-      
-      sudo mount -t tmpfs -o size=4G /dev/null /dev/shm
-      sleep 2
-      sudo nohup dockerd --bip 172.18.0.1/16 </dev/null >/dev/null 2>&1 &
 
       cat ~/.docker_pass | sudo docker login -u $(cat ~/.docker_user) --password-stdin
       TAG=$(date -Ihours | tr :+ -)
