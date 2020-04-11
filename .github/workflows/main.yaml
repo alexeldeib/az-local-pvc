@@ -1,0 +1,31 @@
+on: {
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+}
+
+env:
+  DOCKER_USER: ${{ secrets.DOCKER_USER }}
+  DOCKER_PASS: ${{ secrets.DOCKER_PASS }}
+  REPO: docker.io/alexeldeib
+  IMAGE: az-local-pvc
+
+jobs:
+  build: 
+    name: build formatter
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@master
+    - name: build image
+      run: |
+        set -eux
+        docker login -u ${DOCKER_USER} -p ${DOCKER_PASS}
+        TAG=$(date -Ihours | tr :+ -)
+        echo "TAG: ${TAG}"
+        docker build -t ${REPO}/${IMAGE}:${TAG} .
+        docker tag -t ${REPO}/${IMAGE}:latest .
+        docker push ${REPO}/${IMAGE}:${TAG}
+        docker push ${REPO}/${IMAGE}:latest
