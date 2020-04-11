@@ -10,7 +10,8 @@ secrets:
 sources:
   - https://github.com/alexeldeib/az-local-pvc
 environment:
-
+  REPO: docker.io/alexeldeib
+  IMAGE: az-local-pvc
 tasks:
   - install: |
       set -o errexit
