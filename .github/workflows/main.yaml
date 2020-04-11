@@ -16,7 +16,6 @@ env:
 
 jobs:
   build: 
-    name: build image
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@master
