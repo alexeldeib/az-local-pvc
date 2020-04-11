@@ -14,7 +14,7 @@ sources:
   - https://github.com/alexeldeib/az-local-pvc
 environment:
   docker_version: 19.03.8~3-0
-  container_version: 1.2.6-3
+  containerd_version: 1.2.6-3
 tasks:
   - install: |
       set -o errexit
