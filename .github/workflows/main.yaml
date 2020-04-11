@@ -1,3 +1,5 @@
+name: az-local-pvc
+
 on:
   push:
     branches:
