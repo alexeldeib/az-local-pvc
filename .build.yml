@@ -24,15 +24,16 @@ tasks:
       DISTRO="$(cat /etc/os-release | grep CODENAME | cut -d'=' -f2)"
       echo "deb [arch=amd64] https://download.docker.com/linux/debian $DISTRO stable" | sudo tee /etc/apt/sources.list.d/docker.list
 
-      curl -sL https://download.docker.com/linux/debian/gpg -o debian.asc
-      sudo apt-key add debian.asc
-      sudo apt-get update
-      systemctl status docker || true
-      sudo apt-get install -y docker-ce docker-ce-cli containerd.io
+      curl -sL https://download.docker.com/linux/debian/dists/buster/pool/stable/amd64/containerd.io_1.2.6-3_amd64.deb -o containerd.io.deb
+      curl -sL https://download.docker.com/linux/debian/dists/buster/pool/stable/amd64/docker-ce-cli_19.03.8~3-0~debian-buster_amd64.deb -o docker-ce-cli.io.deb
+      curl -sL https://download.docker.com/linux/debian/dists/buster/pool/stable/amd64/docker-ce_19.03.8~3-0~debian-buster_amd64.deb -o docker-ce.io.deb
 
-      sudo nohup dockerd --bip 172.18.0.1/16 </dev/null >/dev/null 2>&1 &
-      sleep 5
-      sudo usermod -aG docker $(whoami)
+      sudo dpkg -i containerd.io.deb
+      sudo dpkf -i docker-ce-cli.io.deb
+      sudo dpkf -i docker-ce.io.deb
+
+      systemctl status dockerd
+      systemctl status containerd
 
   - build: |
       set -o errexit
