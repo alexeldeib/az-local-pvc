@@ -1,20 +1,76 @@
-#[macro_use]
-extern crate crossbeam_channel;
-use crossbeam_channel::tick;
-
-use slog::{Drain, o, info};
-
 use std::fs;
 use std::io::{self, Error, ErrorKind};
 use std::process::{self, Command, Output};
+use std::str::FromStr;
+use std::sync::Mutex;
 use std::time::Duration;
 
+use slog_atomic::{AtomicSwitch};
+use slog::{Drain, o, info};
+use clap::{value_t, Arg, App};
+use crossbeam_channel::{select, tick};
+
+#[derive(Debug, PartialEq)]
+enum LogFormat {
+    Json,
+    Text,
+}
+
+impl FromStr for LogFormat {
+    type Err = &'static str;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "json" => Ok(LogFormat::Json),
+            "text" => Ok(LogFormat::Text),
+            _ => Err("no match"),
+        }
+    }
+}
+
 fn main() {
-    // let decorator = slog_term::TermDecorator::new().build();
-    // let drain = slog_term::FullFormat::new(decorator).build().fuse();
-    let drain = slog_json::Json::default(std::io::stderr()).fuse();
-    let drain = slog_async::Async::new(drain).build().fuse();
-    let log = slog::Logger::root(drain, o!());
+    let matches = App::new("az-local-pvc")
+        .version("0.0.1-alpha.0")
+        .author("Alexander Eldeib <alexeldeib@gmail.com>")
+        .about("Teaches argument parsing")
+        .arg(Arg::with_name("output")
+                 .short('o')
+                 .long("output")
+                 .takes_value(true)
+                 .required(false)
+                 .possible_values(&["json", "text"])
+                 .help("Output format"))
+        .get_matches();
+
+    // let drain = slog_json::Json::default(std::io::stderr()).fuse();
+    // let drain = slog_async::Async::new(drain).build().fuse();
+    // let drain = AtomicSwitch::new(drain);
+    // let ctrl = drain.ctrl();
+    // let log = slog::Logger::root(drain.fuse(), o!());
+
+    let log_format = value_t!(matches.value_of("output"), LogFormat).unwrap_or(LogFormat::Json);
+
+    let log = match log_format {
+        LogFormat::Json => {
+            let drain = slog_json::Json::default(std::io::stderr()).fuse();
+            let drain = Mutex::new(slog_async::Async::new(drain).build().fuse());
+            let drain = AtomicSwitch::new(drain);
+            slog::Logger::root(drain.fuse(), o!())
+        },
+        LogFormat::Text => {
+            let decorator = slog_term::TermDecorator::new().build();
+            let drain = Mutex::new(slog_term::FullFormat::new(decorator).build());
+            let drain = AtomicSwitch::new(drain);
+            slog::Logger::root(drain.fuse(), o!())
+        },
+    };
+
+    // if log_format == LogFormat::Text {
+    //     let decorator = slog_term::TermDecorator::new().build();
+    //     let drain = Mutex::new(slog_term::FullFormat::new(decorator).build());
+    //     ctrl.set(drain.fuse());
+    // }
+
 
     info!(log, "started binary");
     info!(log, "starting first run");
