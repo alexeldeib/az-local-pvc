@@ -1,13 +1,5 @@
 name: az-local-pvc
 
-on:
-  push:
-    branches:
-      - master
-  pull_request:
-    branches:
-      - master
-
 env:
   DOCKER_USER: ${{ secrets.DOCKER_USER }}
   DOCKER_PASS: ${{ secrets.DOCKER_PASS }}
