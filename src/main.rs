@@ -1,5 +1,5 @@
 use std::fs;
-use io::{self, Error, ErrorKind};
+use std::io::{self, Error, ErrorKind};
 use std::process::{self, Command, Output};
 use std::str::FromStr;
 use std::sync::Mutex;
