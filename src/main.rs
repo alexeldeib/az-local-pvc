@@ -1,5 +1,5 @@
 use std::fs;
-use std::io::{self, Error, ErrorKind};
+use io::{self, Error, ErrorKind};
 use std::process::{self, Command, Output};
 use std::str::FromStr;
 use std::sync::Mutex;
@@ -46,7 +46,7 @@ fn main() {
 
     let log = match log_format {
         LogFormat::Json => {
-            let drain = slog_json::Json::default(std::io::stderr()).fuse();
+            let drain = slog_json::Json::default(io::stderr()).fuse();
             let drain = Mutex::new(slog_async::Async::new(drain).build().fuse());
             let drain = AtomicSwitch::new(drain);
             slog::Logger::root(drain.fuse(), o!())
