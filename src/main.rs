@@ -32,7 +32,7 @@ fn main() {
     let matches = App::new("az-local-pvc")
         .version("0.0.1-alpha.0")
         .author("Alexander Eldeib <alexeldeib@gmail.com>")
-        .about("Teaches argument parsing")
+        .about("formats and mounts nvme drives for use")
         .arg(Arg::with_name("output")
                  .short('o')
                  .long("output")
