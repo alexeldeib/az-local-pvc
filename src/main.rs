@@ -42,12 +42,6 @@ fn main() {
                  .help("Output format"))
         .get_matches();
 
-    // let drain = slog_json::Json::default(std::io::stderr()).fuse();
-    // let drain = slog_async::Async::new(drain).build().fuse();
-    // let drain = AtomicSwitch::new(drain);
-    // let ctrl = drain.ctrl();
-    // let log = slog::Logger::root(drain.fuse(), o!());
-
     let log_format = value_t!(matches.value_of("output"), LogFormat).unwrap_or(LogFormat::Json);
 
     let log = match log_format {
@@ -64,13 +58,6 @@ fn main() {
             slog::Logger::root(drain.fuse(), o!())
         },
     };
-
-    // if log_format == LogFormat::Text {
-    //     let decorator = slog_term::TermDecorator::new().build();
-    //     let drain = Mutex::new(slog_term::FullFormat::new(decorator).build());
-    //     ctrl.set(drain.fuse());
-    // }
-
 
     info!(log, "started binary");
     info!(log, "starting first run");
