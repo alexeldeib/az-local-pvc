@@ -1,13 +1,13 @@
 use std::fs;
-use std::io::{self, BufRead, BufReader, Error, ErrorKind};
-use std::process::{Command, Output};
+use std::io::{self, Error, ErrorKind};
+use std::process::Command;
 use std::str::FromStr;
 use std::sync::Mutex;
 use std::time::Duration;
 
 use clap::{value_t, App, Arg};
 use crossbeam_channel::{select, tick};
-use slog::{error, info, o, Drain, FnValue, Record};
+use slog::{error, info, o, Drain};
 use slog_atomic::AtomicSwitch;
 
 #[derive(Debug, PartialEq)]
@@ -76,7 +76,6 @@ fn main() {
     info!(log, "failed in main loop: {:?}", result);
 }
 
-
 fn work(log: &slog::Logger) -> io::Result<()> {
     // read block devices from sysfs.
     // TODO(ace): we ignore failed conversions from OsString -> String (maybe can avoid?)
@@ -110,15 +109,14 @@ fn work(log: &slog::Logger) -> io::Result<()> {
             };
         }
 
-
         let uuid = match String::from_utf8(output.stdout) {
             Err(e) => return Err(Error::new(ErrorKind::Other, e)),
             Ok(uuid) => uuid,
         };
-        let uuid = uuid.trim_right();
+        let uuid = uuid.trim_end();
         info!(log, "{:?}", uuid);
 
-        let desired_mount = String::from(format!("/mnt/pv-disks/{}", &uuid));
+        let desired_mount = format!("/mnt/pv-disks/{}", &uuid);
 
         if let Err(e) = Command::new("mkdir").arg("-p").arg(&desired_mount).output() {
             return Err(e);
@@ -155,20 +153,22 @@ fn work(log: &slog::Logger) -> io::Result<()> {
                 };
             }
             1 => match mounts[0].as_str() {
-                desired_mount => {
+                desired if desired == desired_mount => {
                     info!(
                         log,
                         "{}",
                         format!(
                             "already correctly mounted disk {:#?}, uuid: {:#?}",
-                            &path, &uuid),
+                            &path, &uuid,
                         )
                     );
                     continue;
                 }
                 other => {
                     match Command::new("umount.static")
-                        .arg(format!("/dev/{}", &path))
+                        .arg("-f")
+                        .arg("-l")
+                        .arg(&other)
                         .output()
                     {
                         Err(e) => return Err(e),

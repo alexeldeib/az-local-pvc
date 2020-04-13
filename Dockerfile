@@ -60,13 +60,13 @@ RUN ["/busybox/busybox", "--install", "/bin"]
 
 # Copy proper versions of util-linux...might as well build our own distro.
 COPY --from=build /app/src/az-local-pvc/target/x86_64-unknown-linux-musl/release/az-local-pvc .
-COPY --from=build /app/util-linux/bin/mount.static /usr/local/bin/mount.static
-COPY --from=build /app/util-linux/bin/umount.static /usr/local/bin/umount.static
-COPY --from=build /app/util-linux/sbin/blkid.static /usr/local/bin/blkid.static
-COPY --from=build /app/util-linux/sbin/mkfs /usr/local/bin/mkfs
+# COPY --from=build /app/util-linux/bin/mount.static /usr/local/bin/mount.static
+# COPY --from=build /app/util-linux/bin/umount.static /usr/local/bin/umount.static
+# COPY --from=build /app/util-linux/sbin/blkid.static /usr/local/bin/blkid.static
+# COPY --from=build /app/util-linux/sbin/mkfs /usr/local/bin/mkfs
 COPY --from=build /app/e2fsprogs/sbin/* /usr/local/bin/
 COPY --from=build /app/e2fsprogs/etc/* /etc/
-COPY --from=build /app/file/usr/local/bin/file /usr/local/bin/file
-COPY --from=build /app/file/usr/local/share/misc/magic.mgc usr/local/share/misc/magic.mgc
+# COPY --from=build /app/file/usr/local/bin/file /usr/local/bin/file
+# COPY --from=build /app/file/usr/local/share/misc/magic.mgc usr/local/share/misc/magic.mgc
 
 ENTRYPOINT ["./az-local-pvc"]
