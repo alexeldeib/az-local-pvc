@@ -5,7 +5,7 @@
 
 # az-local-pvc
 
-The goal of this project is to enable using local SSDs as PVCs in Kubernetes.
+The goal of this project is to enable using NVMe SSDs e.g. on Azure LSv2 VMs with Kubernetes workloads.
 
 ## Experimental
 Code is new and may change or be removed in future versions. Please try it out and provide feedback. If it addresses a use-case that is important to you please open an issue to discuss it further.
