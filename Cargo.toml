@@ -1,6 +1,6 @@
 [package]
 name = "az-local-pvc"
-version = "0.1.0"
+version = "0.0.1"
 authors = ["Ace Eldeib <alexeldeib@gmail.com>"]
 edition = "2018"
 
@@ -14,4 +14,4 @@ slog-term = "2.5.0"
 slog-async = "2.5.0"
 slog-json = "2.3.0"
 slog-atomic = "3.0.0"
-clap = { git = "https://github.com/clap-rs/clap/#7788268d#7788268d" }
+clap = { git = "https://github.com/clap-rs/clap" }

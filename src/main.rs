@@ -5,7 +5,7 @@ use std::str::FromStr;
 use std::sync::Mutex;
 use std::time::Duration;
 
-use clap::{value_t, App, Arg};
+use clap::{App, Arg};
 use crossbeam_channel::{select, tick};
 use slog::{error, info, o, Drain};
 use slog_atomic::AtomicSwitch;
@@ -44,7 +44,7 @@ fn main() {
         )
         .get_matches();
 
-    let log_format = value_t!(matches.value_of("output"), LogFormat).unwrap_or(LogFormat::Json);
+    let log_format: LogFormat = matches.value_of_t("output").unwrap_or(LogFormat::Json);
 
     let log = match log_format {
         LogFormat::Json => {
