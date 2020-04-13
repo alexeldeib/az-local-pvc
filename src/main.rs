@@ -1,14 +1,14 @@
 use std::fs;
-use std::io::{self, Error, ErrorKind};
-use std::process::{self, Command, Output};
+use std::io::{self, BufRead, BufReader, Error, ErrorKind};
+use std::process::{Command, Output};
 use std::str::FromStr;
 use std::sync::Mutex;
 use std::time::Duration;
 
-use slog_atomic::{AtomicSwitch};
-use slog::{Drain, o, info};
-use clap::{value_t, Arg, App};
+use clap::{value_t, App, Arg};
 use crossbeam_channel::{select, tick};
+use slog::{error, info, o, Drain, FnValue, Record};
+use slog_atomic::AtomicSwitch;
 
 #[derive(Debug, PartialEq)]
 enum LogFormat {
@@ -33,13 +33,15 @@ fn main() {
         .version("0.0.1-alpha.0")
         .author("Alexander Eldeib <alexeldeib@gmail.com>")
         .about("formats and mounts nvme drives for use")
-        .arg(Arg::with_name("output")
-                 .short('o')
-                 .long("output")
-                 .takes_value(true)
-                 .required(false)
-                 .possible_values(&["json", "text"])
-                 .help("Output format"))
+        .arg(
+            Arg::with_name("output")
+                .short('o')
+                .long("output")
+                .takes_value(true)
+                .required(false)
+                .possible_values(&["json", "text"])
+                .help("Output format"),
+        )
         .get_matches();
 
     let log_format = value_t!(matches.value_of("output"), LogFormat).unwrap_or(LogFormat::Json);
@@ -50,115 +52,147 @@ fn main() {
             let drain = Mutex::new(slog_async::Async::new(drain).build().fuse());
             let drain = AtomicSwitch::new(drain);
             slog::Logger::root(drain.fuse(), o!())
-        },
+        }
         LogFormat::Text => {
             let decorator = slog_term::TermDecorator::new().build();
             let drain = Mutex::new(slog_term::FullFormat::new(decorator).build());
             let drain = AtomicSwitch::new(drain);
             slog::Logger::root(drain.fuse(), o!())
-        },
+        }
     };
 
     info!(log, "started binary");
     info!(log, "starting first run");
-    let mut result = main_loop(&log);
-    
+    let mut result = work(&log);
+
     info!(log, "beginning ticker");
     let ticker = tick(Duration::from_secs(5));
     while let Ok(_) = result {
         select! {
-            recv(ticker) -> _ => result = main_loop(&log),
+            recv(ticker) -> _ => result = work(&log),
         }
     }
 
     info!(log, "failed in main loop: {:?}", result);
-    process::exit(1);
 }
 
-fn main_loop(log: &slog::Logger) -> io::Result<()> {
-    info!(log, "starting main loop");
-    let block_devices = get_block_devices()
-        .expect("failed to list block devices")
-        .into_iter()
-        .filter(|dev| dev.contains("nvme"))
-        .collect::<Vec<String>>();
 
-    info!(log, "finished discovering block devices");
+fn work(log: &slog::Logger) -> io::Result<()> {
+    // read block devices from sysfs.
+    // TODO(ace): we ignore failed conversions from OsString -> String (maybe can avoid?)
+    let dirs: Vec<String> = match fs::read_dir("/sys/block") {
+        Err(e) => return Err(e),
+        Ok(o) => o
+            .map(|res| res.map(|e| e.file_name().into_string()))
+            .filter_map(|c| c.ok())
+            .map(|res| res.unwrap())
+            .filter(|dev| dev.contains("nvme"))
+            .collect(),
+    };
 
-    info!(log, "enumerating known devices");
-    for dev in block_devices {
-        let needs_fs = should_format(&dev)?;
-        let uuid = get_uuid(&dev).unwrap_or(String::from(""));
-        info!(log, "found disk /dev/{} with existing uuid '{}'", dev, uuid);
-        if needs_fs {
-            info!(log, "formatting disk /dev/{}", dev);
-            format_device(&dev)?;
+    for path in dirs {
+        // get uuid via blkid, if empty needs to be formatted
+        let output = Command::new("blkid")
+            .arg("-o")
+            .arg("value")
+            .arg("-s")
+            .arg("UUID")
+            .arg(format!("/dev/{}", path))
+            .output()?;
+
+        // executed, but no UUID. needs to be formatted
+        if !output.status.success() || output.stdout.is_empty() {
+            if let Err(e) = Command::new("mkfs.ext4")
+                .arg(format!("/dev/{}", path))
+                .output()
+            {
+                return Err(e);
+            };
         }
-        mount_device(&dev)?;
-    }
-    info!(log, "successfully scanned and formatted all disks");
-    Ok(())
-}
 
-fn get_block_devices() -> io::Result<Vec<String>> {
-    fs::read_dir("/sys/block")?
-        .map(|res| res.map(|e| e.file_name().into_string().unwrap()))
-        .collect()
-}
 
-fn get_uuid(path: &str) -> io::Result<String> {
-    let output = Command::new("blkid")
-        .arg("-o")
-        .arg("value")
-        .arg("-s")
-        .arg("UUID")
-        .arg(format!("/dev/{}", path))
-        .output();
+        let uuid = match String::from_utf8(output.stdout) {
+            Err(e) => return Err(Error::new(ErrorKind::Other, e)),
+            Ok(uuid) => uuid,
+        };
+        let uuid = uuid.trim_right();
+        info!(log, "{:?}", uuid);
 
-    match output {
-        Ok(out) => match out.stdout.is_empty() {
-            true => Err(Error::new(ErrorKind::Other, "expected uuid for disk")),
-            false => match String::from_utf8(out.stdout) {
-                Ok(uuid) => Ok(uuid),
-                Err(e) => Err(Error::new(ErrorKind::Other, e)),
+        let desired_mount = String::from(format!("/mnt/pv-disks/{}", &uuid));
+
+        if let Err(e) = Command::new("mkdir").arg("-p").arg(&desired_mount).output() {
+            return Err(e);
+        };
+
+        let mounts: Vec<String> = match Command::new("mount.static").output() {
+            Err(e) => return Err(e),
+            Ok(o) => {
+                if !o.status.success() {
+                    return Err(Error::new(
+                        ErrorKind::Other,
+                        "failed to execute mount, should never happen",
+                    ));
+                }
+                match String::from_utf8(o.stdout) {
+                    Err(e) => return Err(Error::new(ErrorKind::Other, e)),
+                    Ok(o) => o
+                        .lines()
+                        .filter(|line| line.find(&path).is_some())
+                        .map(|line| String::from(line))
+                        .collect(),
+                }
+            }
+        };
+
+        match mounts.len() {
+            0 => {
+                if let Err(e) = Command::new("mount.static")
+                    .arg(format!("/dev/{}", &path))
+                    .arg(&desired_mount)
+                    .output()
+                {
+                    return Err(e);
+                };
+            }
+            1 => match mounts[0].as_str() {
+                desired_mount => {
+                    info!(
+                        log,
+                        "{}",
+                        format!(
+                            "already correctly mounted disk {:#?}, uuid: {:#?}",
+                            &path, &uuid),
+                        )
+                    );
+                    continue;
+                }
+                other => {
+                    match Command::new("umount.static")
+                        .arg(format!("/dev/{}", &path))
+                        .output()
+                    {
+                        Err(e) => return Err(e),
+                        Ok(out) => {
+                            if !out.status.success() {
+                                return Err(Error::new(ErrorKind::Other, format!("failed to unmount wrongly mounted device -- stdout: {:?} -- stderr: {:?}", out.stdout, out.stderr)));
+                            }
+                            Command::new("mount.static")
+                                .arg(format!("/dev/{}", &path))
+                                .arg(&desired_mount)
+                                .output()
+                                .map(|_| ())?
+                        }
+                    }
+                }
             },
-        },
-        Err(e) => Err(e),
+            _ => {
+                error!(
+                    log,
+                    "{}",
+                    format!("found multiple mountpoints for disk: {:#?}", &path)
+                );
+            }
+        }
     }
-}
-
-fn should_format(path: &str) -> io::Result<bool> {
-    let output = Command::new("blkid")
-        .arg("-o")
-        .arg("value")
-        .arg("-s")
-        .arg("UUID")
-        .arg(format!("/dev/{}", path))
-        .output();
-
-    match output {
-        Ok(out) => Ok(out.stdout.is_empty()),
-        Err(e) => Err(Error::new(ErrorKind::Other, e)),
-    }
-}
-
-fn format_device(path: &str) -> io::Result<Output> {
-    Command::new("mke2fs")
-        .arg("-t")    
-        .arg("ext4")
-        .arg(format!("/dev/{}", path))
-        .output()
-}
-
-fn mount_device(path: &str) -> io::Result<Output> {    
-    // TODO(ace): don't shell out for this
-    Command::new("mkdir")    
-        .arg("-p")
-        .arg(format!("/mnt/pv-disks/{}", &path))
-        .output()?;
-
-    Command::new("mount")
-        .arg(format!("/dev/{}", &path))
-        .arg(format!("/mnt/pv-disks/{}", &path))
-        .output()
+    Ok(())
 }

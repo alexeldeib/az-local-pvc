@@ -14,4 +14,4 @@ slog-term = "2.5.0"
 slog-async = "2.5.0"
 slog-json = "2.3.0"
 slog-atomic = "3.0.0"
-clap = { git = "https://github.com/clap-rs/clap/" }
+clap = { git = "https://github.com/clap-rs/clap/#7788268d#7788268d" }
