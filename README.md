@@ -5,17 +5,14 @@
 
 # az-local-pvc
 
-The goal of this project is to enable using NVMe SSDs e.g. on Azure LSv2 VMs with Kubernetes workloads.
-
-## Experimental
-Code is new and may change or be removed in future versions. Please try it out and provide feedback. If it addresses a use-case that is important to you please open an issue to discuss it further.
-
+The goal of this project is to enable using NVMe SSDs e.g. on Azure LSv2 VMs with Kubernetes workloads
 
 The project uses two pods to achieve this:
 - bootstrapper to format and mount disks initially
 - sig-storage-static-local-provisioner to scan local disks and create PVs for them.
 
-src/main.rs scans for unmounted, unformatted nvme devices. It formats and mounts them, handing off control to the provisioner for the lifecycle of drive usage in Kubernetes.
+## Experimental
+Code is new and may change or be removed in future versions. Please try it out and provide feedback. If it addresses a use-case that is important to you please open an issue to discuss it further.
 
 ## Usage
 
