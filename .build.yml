@@ -13,6 +13,6 @@ environment:
   REPO: docker.io/alexeldeib
 tasks:
 - install: |
-    bash ~/az-local-pvc/build/setup_docker.sh
+    bash ~/az-local-pvc/hack/setup_docker.sh
 - build: |
-    bash ~/az-local-pvc/build/build.sh
+    bash ~/az-local-pvc/hack/build.sh
