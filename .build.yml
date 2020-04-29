@@ -1,33 +1,18 @@
 image: debian/buster
-environment:
-  repo: docker.io/alexeldeib
-  image: az-local-pvc
 packages:
-  - docker
+- curl
+- gpg
+- apt-transport-https
 secrets:
   - 7bb48981-fc03-4344-bae3-736c99f94f49 # docker_user
   - 21bdadaa-095c-4968-9a6e-ce9b795042b4 # docker_pass
 sources:
   - https://github.com/alexeldeib/az-local-pvc
 environment:
+  APP: az-local-pvc
   REPO: docker.io/alexeldeib
-  IMAGE: az-local-pvc
 tasks:
-  - build: |
-      set -o errexit
-      set -o nounset
-      set -o pipefail
-      
-      cd ~/az-local-pvc
-      cat ~/.docker_pass | sudo docker login -u $(cat ~/.docker_user) --password-stdin
-      TAG=$(date -Iseconds | tr :+ -)
-      echo "TAG: ${TAG}"
-      sudo docker build -t ${REPO}/${IMAGE}:${TAG} .
-      
-      docker images 
-
-      sudo docker tag ${REPO}/${IMAGE}:${TAG} ${REPO}/${IMAGE}:latest
-      sudo docker push ${REPO}/${IMAGE}:${TAG}
-      sudo docker push ${REPO}/${IMAGE}:latest
-
-      docker images
+- install: |
+    bash ~/az-local-pvc/build/setup_docker.sh
+- build: |
+    bash ~/az-local-pvc/build/build.sh
