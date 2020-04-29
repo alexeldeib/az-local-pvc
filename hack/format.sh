@@ -14,7 +14,7 @@ STRIDE=$(expr $RAID_CHUNK_SIZE \* 1024 / $FILESYSTEM_BLOCK_SIZE || true)
 STRIPE_WIDTH=$(expr $SSD_NVME_DEVICE_COUNT \* $STRIDE || true)
 
 # if [ ! -d "/mnt/pv-disks" ]; then
-#   # Control will enter here if $DIRECTORY doesn't exist.
+# dir should already be created by kube
 # fi
 
 # Checking if provisioning already happend
@@ -26,7 +26,6 @@ then
   sleep infinity
 fi
 
-# Perform provisioning based on nvme device count
 case $SSD_NVME_DEVICE_COUNT in
 "0")
   echo 'No NVMe devices found, check the instance SKU if you expect them to appear.'
