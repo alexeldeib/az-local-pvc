@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 
+set -x
 set -o errexit
 set -o nounset
 set -o pipefail
 
-SSD_NVME_DEVICE_LIST=($(ls /sys/block | grep nvme || true))
+SSD_NVME_DEVICE_LIST=($(ls /sys/block | grep nvme | xargs -I. echo /dev/. || true))
 SSD_NVME_DEVICE_COUNT=${#SSD_NVME_DEVICE_LIST[@]}
 RAID_DEVICE=${RAID_DEVICE:-/dev/md0}
 RAID_CHUNK_SIZE=${RAID_CHUNK_SIZE:-512}  # Kilobytes
@@ -12,11 +13,15 @@ FILESYSTEM_BLOCK_SIZE=${FILESYSTEM_BLOCK_SIZE:-4096}  # bytes
 STRIDE=$(expr $RAID_CHUNK_SIZE \* 1024 / $FILESYSTEM_BLOCK_SIZE || true)
 STRIPE_WIDTH=$(expr $SSD_NVME_DEVICE_COUNT \* $STRIDE || true)
 
+# if [ ! -d "/mnt/pv-disks" ]; then
+#   # Control will enter here if $DIRECTORY doesn't exist.
+# fi
+
 # Checking if provisioning already happend
-if [[ "$(ls -A /pv-disks)" ]]
+if [[ "$(ls -A /mnt/pv-disks)" ]]
 then
-  echo 'Volumes already present in "/pv-disks"'
-  echo -e "\n$(ls -Al /pv-disks | tail -n +2)\n"
+  echo 'Volumes already present in "/mnt/pv-disks"'
+  echo -e "\n$(ls -Al /mnt/pv-disks | tail -n +2)\n"
   echo "I assume that provisioning already happend, doing nothing!"
   sleep infinity
 fi
