@@ -45,7 +45,7 @@ kubectl rollout status daemonset/local-storage-provisioner
 kubectl rollout status daemonset/local-storage-formatter
 ```
 
-local-storage-consumer.yaml contains a PVC using the newly created storage class and a pod with a claim for that PVC. Apply this to test the pod should schedule and run successfully. Deleting that manifest deletes both the pod and the PVC, so the pv status via `kubctl get pv -w` should cycle from bound, to released, to terminated, to available withing ~1-2 minutes.
+local-storage-consumer.yaml contains a PVC using the newly created storage class and a pod with a claim for that PVC. Apply this and the pod should schedule and run successfully. Deleting that manifest deletes both the pod and the PVC, so the pv status via `kubctl get pv -w` should cycle from bound, to released, to terminated, to available within ~1-2 minutes.
 
 ```bash
 kubectl apply -f manifests/local-storage-consumer.yaml
