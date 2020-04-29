@@ -4,6 +4,7 @@ use std::process::Command;
 use std::str::FromStr;
 use std::sync::Mutex;
 use std::time::Duration;
+use std::ffi::OsString;
 
 use clap::{App, Arg};
 use crossbeam_channel::{select, tick};
@@ -28,7 +29,7 @@ impl FromStr for LogFormat {
     }
 }
 
-fn main() {
+fn main() -> io::Result<()> {
     let matches = App::new("az-local-pvc")
         .version("0.0.1-alpha.0")
         .author("Alexander Eldeib <alexeldeib@gmail.com>")
@@ -63,17 +64,37 @@ fn main() {
 
     info!(log, "started binary");
     info!(log, "starting first run");
-    let mut result = work(&log);
+    // let mut result = work(&log);
 
-    info!(log, "beginning ticker");
-    let ticker = tick(Duration::from_secs(5));
-    while let Ok(_) = result {
-        select! {
-            recv(ticker) -> _ => result = work(&log),
-        }
+    // info!(log, "beginning ticker");
+    // let ticker = tick(Duration::from_secs(5));
+    // while let Ok(_) = result {
+    //     select! {
+    //         recv(ticker) -> _ => result = work(&log),
+    //     }
+    // }
+
+    let mut enumerator = udev::Enumerator::new().unwrap();
+
+    // if let Err(e) = enumerator.match_subsystem(&"disk") {
+    //     error!(log, "failed to match devtype attribute: {:#?}", e);
+    //     return Err(e);
+    // }
+    
+    if let Err(e) = enumerator.match_sysname(&"sd*") {
+        return Err(e);
     }
 
-    info!(log, "failed in main loop: {:?}", result);
+    let devices: Vec<udev::Device> = enumerator.scan_devices()?.collect();
+    let index = 6;
+
+    for dev in devices {
+        info!(log, "devices: {:#?}", dev.attributes().map(|a| String::from(a.name().to_string_lossy())).collect::<Vec<String>>()[index]);
+        info!(log, "devices: {:#?}", dev.attributes().map(|a| String::from(a.value().unwrap_or_default().to_string_lossy())).collect::<Vec<String>>()[index]);
+    }
+
+    info!(log, "finished main loop");
+    Ok(())
 }
 
 fn work(log: &slog::Logger) -> io::Result<()> {

@@ -1,4 +1,4 @@
-image: archlinux
+image: debian/buster
 environment:
   repo: docker.io/alexeldeib
   image: az-local-pvc
@@ -13,17 +13,6 @@ environment:
   REPO: docker.io/alexeldeib
   IMAGE: az-local-pvc
 tasks:
-  - install: |
-      set -o errexit
-      set -o nounset
-      set -o pipefail
-
-      # See https://todo.sr.ht/~sircmpwn/builds.sr.ht/223 for why this is
-      # needed.
-      sudo mount -t tmpfs -o size=4G /dev/null /dev/shm
-      sleep 2
-      sudo nohup dockerd --bip 172.18.0.1/16 </dev/null >/dev/null 2>&1 &
-      sudo usermod -aG docker $(whoami)
   - build: |
       set -o errexit
       set -o nounset
