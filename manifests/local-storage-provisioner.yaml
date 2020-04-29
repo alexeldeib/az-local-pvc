@@ -9,13 +9,12 @@ metadata:
 data:
   storageClassMap: |     
     fast-disks:
-       hostDir: /mnt/pv-disks
-       mountDir: /mnt/pv-disks 
+       hostDir: /pv-disks
+       mountDir: /pv-disks 
        blockCleanerCommand:
          - "/scripts/shred.sh"
          - "2"
        setPVOwnerRef: true
-
 ---
 apiVersion: apps/v1
 kind: DaemonSet
@@ -51,7 +50,7 @@ spec:
             readOnly: true
           - mountPath: /dev
             name: provisioner-dev
-          - mountPath:  /mnt/pv-disks
+          - mountPath:  /pv-disks
             name: pv-disks
             mountPropagation: "HostToContainer" 
       volumes:
@@ -63,5 +62,5 @@ spec:
             path: /dev
         - name: pv-disks
           hostPath:
-            path: /mnt/pv-disks
+            path: /pv-disks
 ---

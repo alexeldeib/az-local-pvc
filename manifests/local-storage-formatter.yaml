@@ -25,7 +25,7 @@ spec:
         securityContext:
           privileged: true
         volumeMounts:           
-        - mountPath:  /mnt/pv-disks 
+        - mountPath:  /pv-disks 
           name: pv-disks
           mountPropagation: "Bidirectional" 
         - mountPath: /sys
@@ -36,7 +36,7 @@ spec:
             path: /dev
         - name: pv-disks
           hostPath:
-            path: /mnt/pv-disks
+            path: /pv-disks
         - name: sys
           hostPath:
             path: /sys
