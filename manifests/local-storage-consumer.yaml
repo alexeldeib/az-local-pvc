@@ -35,6 +35,8 @@ spec:
       labels:
         app: local-storage-consumer
     spec:
+      nodeSelector:
+        node.kubernetes.io/instance-type: "Standard_L16s_v2"
       hostPID: true
       containers:
       - image: ubuntu:bionic
