@@ -14,12 +14,16 @@ The project uses two pods to achieve this:
 ## Experimental
 Code is new and may change or be removed in future versions. Please try it out and provide feedback. If it addresses a use-case that is important to you please open an issue to discuss it further.
 
+## Demo 
+
+[![asciicast](https://asciinema.org/a/325049.svg)](https://asciinema.org/a/325049)
+
 ## Usage
 
 Under manifests/ there are several raw Kubernetes yaml files as well as a Kustomize manifest. 
 
 Required:
-- local-storage-formatted.yaml
+- local-storage-formatter.yaml
 - local-storage-provisioner.yaml
 - rbac.yaml
 - storage-class.yaml
@@ -31,22 +35,34 @@ The kustomize manifest directly applies only the required manifests.
 or 
 
 ```bash
-kubectl apply -f manifests/local-storage-formatted.yaml
+kubectl apply -f manifests/local-storage-formatter.yaml
 kubectl apply -f manifests/local-storage-provisioner.yaml
 kubectl apply -f manifests/rbac.yaml
 kubectl apply -f manifests/storage-class.yaml
+
+# Wait for rollout
+kubectl rollout status daemonset/local-storage-provisioner
+kubectl rollout status daemonset/local-storage-formatter
 ```
 
 local-storage-consumer.yaml contains a PVC using the newly created storage class and a pod with a claim for that PVC. Apply this to test the pod should schedule and run successfully. Deleting that manifest deletes both the pod and the PVC, so the pv status via `kubctl get pv -w` should cycle from bound, to released, to terminated, to available withing ~1-2 minutes.
 
 ```bash
 kubectl apply -f manifests/local-storage-consumer.yaml
-kubectl get pod -w # wait for running
+
+# wait for running
+kubectl rollout status deploy/local-storage-consumer
+
+# delete it
 kubectl delete -f manifests/local-storage-consumer.yaml
-kubectl get pv -w # wait for pv to cycle back to available. unreliable currently with blkid, see below.
+
+# wait for pv to cycle back to available.
+kubectl get pv -w
 ```
 
 ## Mechanics
+
+Disclaimer: these are under rapid change and may not always be accurate.
 
 - Enumerate /sys/block/* for devices that look like nvme (name contains "nvme")
 - Get UUID. If populated, disk has been formatted.
