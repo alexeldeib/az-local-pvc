@@ -26,6 +26,8 @@ spec:
         - mountPath:  /mnt/pv-disks 
           name: pv-disks
           mountPropagation: "Bidirectional" 
+        - mountPath: /sys
+          name: sys
       volumes:
         - name: provisioner-dev
           hostPath:
@@ -33,4 +35,7 @@ spec:
         - name: pv-disks
           hostPath:
             path: /mnt/pv-disks
+        - name: sys
+          hostPath:
+            path: /sys
 ---
