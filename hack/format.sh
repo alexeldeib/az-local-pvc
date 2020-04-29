@@ -13,15 +13,15 @@ FILESYSTEM_BLOCK_SIZE=${FILESYSTEM_BLOCK_SIZE:-4096}  # bytes
 STRIDE=$(expr $RAID_CHUNK_SIZE \* 1024 / $FILESYSTEM_BLOCK_SIZE || true)
 STRIPE_WIDTH=$(expr $SSD_NVME_DEVICE_COUNT \* $STRIDE || true)
 
-# if [ ! -d "/mnt/pv-disks" ]; then
+# if [ ! -d "/pv-disks" ]; then
 # dir should already be created by kube
 # fi
 
 # Checking if provisioning already happend
-if [[ "$(ls -A /mnt/pv-disks)" ]]
+if [[ "$(ls -A /pv-disks)" ]]
 then
-  echo 'Volumes already present in "/mnt/pv-disks"'
-  echo -e "\n$(ls -Al /mnt/pv-disks | tail -n +2)\n"
+  echo 'Volumes already present in "/pv-disks"'
+  echo -e "\n$(ls -Al /pv-disks | tail -n +2)\n"
   echo "I assume that provisioning already happend, doing nothing!"
   sleep infinity
 fi

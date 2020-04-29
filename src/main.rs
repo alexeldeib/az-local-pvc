@@ -137,7 +137,7 @@ fn work(log: &slog::Logger) -> io::Result<()> {
         let uuid = uuid.trim_end();
         info!(log, "{:?}", uuid);
 
-        let desired_mount = format!("/mnt/pv-disks/{}", &uuid);
+        let desired_mount = format!("/pv-disks/{}", &uuid);
 
         if let Err(e) = Command::new("mkdir").arg("-p").arg(&desired_mount).output() {
             return Err(e);

@@ -1,23 +1,4 @@
 ---
-# Source: provisioner/templates/provisioner.yaml
- 
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: az-pvc-config 
-  namespace: default 
-data:
-  storageClassMap: |     
-    fast-disks:
-       hostDir: /mnt/pv-disks
-       mountDir: /mnt/pv-disks 
-       blockCleanerCommand:
-         - "/scripts/shred.sh"
-         - "2"
-       setPVOwnerRef: true
-       volumeMode: Filesystem
-       fsType: ext4
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
