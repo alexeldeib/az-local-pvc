@@ -63,6 +63,7 @@ echo -e "${COLOR}${NOCOLOR}"
 
 sleep 3
 
+kubectl apply -f manifests/storage-class.yaml
 kubectl apply -f manifests/rbac.yaml
 kubectl apply -f manifests/local-storage-provisioner.yaml
 kubectl apply -f manifests/local-storage-formatter.yaml
@@ -142,3 +143,4 @@ sleep 3
 kubectl delete -f manifests/local-storage-formatter.yaml
 kubectl delete -f manifests/local-storage-provisioner.yaml
 kubectl delete -f manifests/rbac.yaml
+kubectl delete -f manifests/storage-class.yaml
