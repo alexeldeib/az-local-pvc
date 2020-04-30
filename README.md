@@ -58,6 +58,12 @@ kubectl delete -f manifests/local-storage-consumer.yaml
 
 # wait for pv to cycle back to available.
 kubectl get pv -w
+
+# clean up formatter and provisioner, if desired
+kubectl delete -f manifests/local-storage-formatter.yaml
+kubectl delete -f manifests/local-storage-provisioner.yaml
+kubectl delete -f manifests/rbac.yaml
+kubectl delete -f manifests/storage-class.yaml
 ```
 
 ## Mechanics
