@@ -2,6 +2,9 @@
 [![builds.sr.ht status](https://builds.sr.ht/~alexeldeib/az-local-pvc/.build.yml.svg)](https://builds.sr.ht/~alexeldeib/az-local-pvc/.build.yml?)
 <!-- [![github actions status](https://github.com/alexeldeib/az-local-pvc/workflows/.github/workflows/main.yaml/badge.svg?branch=master)](https://github.com/alexeldeib/az-local-pvc/actions?query=workflow%3A.github%2Fworkflows%2Fmain.yaml) -->
 
+# WARNING
+
+This project was made before the local volume provisioner could detect nvme drives by pattern. The recommended usage is now here: https://github.com/Azure/kubernetes-volume-drivers/tree/master/local#usage
 
 # az-local-pvc
 
