@@ -6,6 +6,8 @@
 
 This project was made before the local volume provisioner could detect nvme drives by pattern. The recommended usage is now here: https://github.com/Azure/kubernetes-volume-drivers/tree/master/local#usage
 
+You still may need this if you want to RAID multiple disks, which the local provisioner doesn't normally support via patterns. 
+
 # az-local-pvc
 
 The goal of this project is to enable using NVMe SSDs e.g. on Azure LSv2 VMs with Kubernetes workloads
